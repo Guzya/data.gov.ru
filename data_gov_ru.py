@@ -1,3 +1,10 @@
+# Необходимо заполнить access_token 
+# для работы с порталом data.gov.ru
+# Выдается при регистрации на data.gov.ru
+#
+#
+
+
 from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 import ssl
