@@ -14,7 +14,7 @@ import datetime
 import time
 import random
 import os
-
+import sys
 
 def getDatasets(access_token, ctx):
     """Перечень наборов данных"""
@@ -122,17 +122,23 @@ def getDataSetsFiltered(datasets, filterString):
 
     datasetsFiltered = []
     for line in datasets:
-        if (line['organization_name'] is None)or(filterString not in line['organization_name']):
+        if (line['organization_name'] is None)or(filterString not in line['organization_name'].lower()):
             continue
         datasetsFiltered.append(line)
     return datasetsFiltered
 
 
-def main(access_token, ctx=None):
+def main(access_token, search_string=None, ctx=None):
     """Основная функция"""
 
     datasets = getDatasets(access_token, ctx)
-    datasets_data = getDataSetsFiltered(datasets,'Москв')    # Отбираем данные по Москве
+    with open('datasets.json','w', encoding='utf-8') as f:
+        json.dump(datasets, f)
+		
+    if len(sys.argv) == 1:
+        exit(0)
+		
+    datasets_data = getDataSetsFiltered(datasets, search_string.lower())    # Отбираем данные по Москве
     
     datasets_version = []
     i = 0
@@ -155,5 +161,12 @@ if __name__ == '__main__':
     ctx = ssl.create_default_context(capath='/etc/ssl/certs')
     
     access_token = os.environ['data_gov_access_token']  # Выдается при регистрации на data.gov.ru   
-
-    main(access_token, ctx)
+    if len(sys.argv) == 1:
+        main(access_token, ctx=ctx)
+    elif len(sys.argv) == 2:
+		print('Строка поиска: \'{}\''.format(sys.argv[1]))
+        main(access_token, search_string=sys.argv[1], ctx=ctx)
+    else:
+        print('Аргументов должно быть не больше одного.')
+        print('Пример: python3 data_gov_ru.py \'Москв\'')
+        exit(1)
