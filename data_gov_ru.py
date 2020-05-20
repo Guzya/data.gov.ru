@@ -1,4 +1,5 @@
 # Необходимо заполнить access_token 
+# (сделал ч\з переменную окружения "data_gov_access_token")
 # для работы с порталом data.gov.ru
 # Выдается при регистрации на data.gov.ru
 #
@@ -121,7 +122,7 @@ def getDataSetsFiltered(datasets, filterString):
 
     datasetsFiltered = []
     for line in datasets:
-        if filterString not in line['organization_name']:
+        if (line['organization_name'] is None)or(filterString not in line['organization_name']):
             continue
         datasetsFiltered.append(line)
     return datasetsFiltered
@@ -131,18 +132,18 @@ def main(access_token, ctx=None):
     """Основная функция"""
 
     datasets = getDatasets(access_token, ctx)
-    KBR = getDataSetsFiltered(datasets,'Москв')    # Отбираем данные по Москве
-
-    KBRVersion = []
+    datasets_data = getDataSetsFiltered(datasets,'Москв')    # Отбираем данные по Москве
+    
+    datasets_version = []
     i = 0
-    for dataset in KBR:
+    for dataset in datasets_data:
         i = i + 1
         print('getDatasetVersion: ' + str(i))
         time.sleep(random.randint(0, 6))
-        KBRVersion.append(getDatasetVersion(dataset['identifier'], access_token, ctx))
+        datasets_version.append(getDatasetVersion(dataset['identifier'], access_token, ctx))
     
     i = 0
-    for dataset in KBRVersion:
+    for dataset in datasets_version:
         i = i + 1
         print('getDatasetData: ' + str(i))
         time.sleep(random.randint(0, 6))
@@ -153,6 +154,6 @@ if __name__ == '__main__':
 
     ctx = ssl.create_default_context(capath='/etc/ssl/certs')
     
-    access_token = ''  # Выдается при регистрации на data.gov.ru
+    access_token = os.environ['data_gov_access_token']  # Выдается при регистрации на data.gov.ru   
 
     main(access_token, ctx)
