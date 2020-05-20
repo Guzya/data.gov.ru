@@ -102,7 +102,7 @@ def getDatasetData(dataset, access_token, ctx=None):
 
         print('updateDate: {} ,Index: {}'.format(updateDate, index))
 
-        # Качаем файл с данными
+        # Качаем файл с данными        
         dataFile = urlopen(datasetSource[index]['source'], context=ctx)
         print('URL dataset file: ' + datasetSource[index]['source'])
                 	        
@@ -130,6 +130,7 @@ def getDatasetData(dataset, access_token, ctx=None):
         print(e)
         return None        
     except Exception as e:
+        print('Ошибка -------:')
         print(e)
         print(dataset)
         return None
@@ -151,6 +152,9 @@ def main(access_token, search_string=None, ctx=None):
     """Основная функция"""
 
     datasets = getDatasets(access_token, ctx)
+    if datasets is None:
+        print('Не смогли получить перечень наборов данных')
+        exit(1)
     print('Всего наборов данных: {}'.format(len(datasets)))
     
     with open('datasets.json','w', encoding='utf-8') as f:
