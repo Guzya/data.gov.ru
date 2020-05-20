@@ -28,6 +28,9 @@ def getDatasets(access_token, ctx):
     except URLError as e:
         print(e)
         return None
+    except JSONDecodeError as e:
+        print(e)
+        return None
 
 
 def getDatasetVersion(dataset, access_token, ctx=None):
@@ -42,8 +45,15 @@ def getDatasetVersion(dataset, access_token, ctx=None):
     except URLError as e:
         print(e)
         return None
-
-
+    except JSONDecodeError as e:
+        print(e)
+        return None
+    except Exception as e:
+        print(e)
+        print(dataset)
+        return None
+        
+        
 def getDatasetData(dataset, access_token, ctx=None):
     """Скачиваем набор данных (сами данные)"""
 
@@ -110,6 +120,9 @@ def getDatasetData(dataset, access_token, ctx=None):
     except URLError as e:
         print(e)
         return None
+    except JSONDecodeError as e:
+        print(e)
+        return None        
     except Exception as e:
         print(e)
         print(dataset)
@@ -164,7 +177,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         main(access_token, ctx=ctx)
     elif len(sys.argv) == 2:
-		print('Строка поиска: \'{}\''.format(sys.argv[1]))
+        print('Строка поиска: \'{}\''.format(sys.argv[1]))
         main(access_token, search_string=sys.argv[1], ctx=ctx)
     else:
         print('Аргументов должно быть не больше одного.')
