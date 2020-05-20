@@ -10,6 +10,7 @@ from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 import ssl
 import json
+from json import JSONDecodeError
 import datetime
 import time
 import random
@@ -19,9 +20,9 @@ import sys
 def getDatasets(access_token, ctx):
     """Перечень наборов данных"""
 
-    try:
+    try:        
         html = urlopen('https://data.gov.ru/api/json/dataset/?access_token=' + access_token, context=ctx)
-        return json.loads(html.read())
+        return json.loads(html.read(), strict=False)
     except HTTPError as e:
         print(e)
         return None
@@ -36,9 +37,10 @@ def getDatasets(access_token, ctx):
 def getDatasetVersion(dataset, access_token, ctx=None):
     """Достаем информацию по конкретному набору данных (НЕ сами данные)"""
 
-    try:
+    try:		
+        print('https://data.gov.ru/api/json/dataset/' + dataset + '?access_token=' + access_token)
         html = urlopen('https://data.gov.ru/api/json/dataset/' + dataset + '?access_token=' + access_token, context=ctx)
-        return json.loads(html.read())
+        return json.loads(html.read(), strict=False)
     except HTTPError as e:
         print(e)
         return None
@@ -46,11 +48,13 @@ def getDatasetVersion(dataset, access_token, ctx=None):
         print(e)
         return None
     except JSONDecodeError as e:
-        with open('err_json.txt','w') as f:
+        with open('/home/guzya/python/data.gov.ru/err_json.txt','w') as f:
             f.write(html.read())
         print(e)
         return None
     except Exception as e:
+        with open('/home/guzya/python/data.gov.ru/err_json.txt','w') as f:
+            f.write(html.read())
         print(e)
         print(dataset)
         return None
@@ -100,7 +104,7 @@ def getDatasetData(dataset, access_token, ctx=None):
 
         # Качаем файл с данными
         dataFile = urlopen(datasetSource[index]['source'], context=ctx)
-        print('URL source: ' + datasetSource[index]['source'])
+        print('URL dataset file: ' + datasetSource[index]['source'])
                 	        
         with open(fileName, 'bw') as f:
             f.write(dataFile.read())
@@ -147,13 +151,16 @@ def main(access_token, search_string=None, ctx=None):
     """Основная функция"""
 
     datasets = getDatasets(access_token, ctx)
+    print('Всего наборов данных: {}'.format(len(datasets)))
+    
     with open('datasets.json','w', encoding='utf-8') as f:
         json.dump(datasets, f, indent=4)
 		
     if len(sys.argv) == 1:
         exit(0)
 		
-    datasets_data = getDataSetsFiltered(datasets, search_string.lower())    # Отбираем данные по Москве
+    datasets_data = getDataSetsFiltered(datasets, search_string.lower())        # Отбираем данные по Строке поиска
+    print('По критерию поиска подходит наборов: {}'.format(len(datasets_data)))
     
     datasets_version = []
     i = 0
