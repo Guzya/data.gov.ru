@@ -102,7 +102,7 @@ def getDatasetData(dataset, access_token, ctx=None):
 
         print('updateDate: {} ,Index: {}'.format(updateDate, index))
 
-        # Качаем файл с данными        
+       # Качаем файл с данными        
         dataFile = urlopen(datasetSource[index]['source'], context=ctx)
         print('URL dataset file: ' + datasetSource[index]['source'])
                 	        
