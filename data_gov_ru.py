@@ -46,6 +46,8 @@ def getDatasetVersion(dataset, access_token, ctx=None):
         print(e)
         return None
     except JSONDecodeError as e:
+        with open('err_json.txt','w') as f:
+            f.write(html.read())
         print(e)
         return None
     except Exception as e:
@@ -146,7 +148,7 @@ def main(access_token, search_string=None, ctx=None):
 
     datasets = getDatasets(access_token, ctx)
     with open('datasets.json','w', encoding='utf-8') as f:
-        json.dump(datasets, f)
+        json.dump(datasets, f, indent=4)
 		
     if len(sys.argv) == 1:
         exit(0)
