@@ -48,12 +48,12 @@ def getDatasetVersion(dataset, access_token, ctx=None):
         print(e)
         return None
     except JSONDecodeError as e:
-        with open('/home/guzya/python/data.gov.ru/err_json.txt','w') as f:
+        with open(os.path.dirname(sys.argv[0]) + '/err_json.txt','w') as f:
             f.write(html.read())
         print(e)
         return None
     except Exception as e:
-        with open('/home/guzya/python/data.gov.ru/err_json.txt','w') as f:
+        with open(os.path.dirname(sys.argv[0]) + '/err.txt','w') as f:
             f.write(html.read())
         print(e)
         print(dataset)
