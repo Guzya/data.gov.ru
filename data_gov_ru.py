@@ -40,9 +40,9 @@ def getDatasets(access_token, ctx):
 def getDatasetVersion(dataset, access_token, ctx=None):
     """Достаем информацию по конкретному набору данных (НЕ сами данные)"""
 
-    try:		
-        logger.info('https://data.gov.ru/api/json/dataset/{}?access_token={}'.format(dataset, access_token))
+    try:		        
         html = urlopen('https://data.gov.ru/api/json/dataset/' + dataset + '?access_token=' + access_token, context=ctx)
+        logger.info('Url Dataset Version: {}'.format(html.url))
         return json.loads(html.read(), strict=False)
     except HTTPError as e:
         logger.error(e)
@@ -111,8 +111,7 @@ def getDatasetData(dataset, access_token, ctx=None):
             dataFile = urlopen(
             'https://data.gov.ru/api/json/dataset/' + dataset['identifier'] + '/version/' + datasetCreated[0][
                 'created'] + '/content/?access_token=' + access_token, context=ctx)
-            logger.info('URL dataset file: https://data.gov.ru/api/json/dataset/{}/version/{}/content'
-                +'/?access_token={}'.format(dataset['identifier'], datasetCreated[0]['created'], access_token))
+            logger.info('URL dataset file: {}'.format(dataFile.url))
             
             with open(fileName, 'w') as f:
                 dataLines = json.loads(dataFile.read())
@@ -123,7 +122,7 @@ def getDatasetData(dataset, access_token, ctx=None):
             
         else:        
             dataFile = urlopen(datasetSource[index]['source'], context=ctx)
-            logger.info('URL dataset file: ' + datasetSource[index]['source'])
+            logger.info('URL dataset file: {}'.format(dataFile.url))
             with open(fileName, 'bw') as f:
                 f.write(dataFile.read())
 
@@ -131,8 +130,7 @@ def getDatasetData(dataset, access_token, ctx=None):
             'https://data.gov.ru/api/json/dataset/' + dataset['identifier'] + '/version/' + datasetCreated[0][
                 'created'] + '/structure' + '/?access_token=' + access_token, context=ctx)
         
-        logger.info('URL structure file: https://data.gov.ru/api/json/dataset/{}/version/{}/structure' 
-            + '/?access_token={}'.format(dataset['identifier'], datasetCreated[0]['created'], access_token))
+        logger.info('URL structure file: {}'.format(html.url))
         
         datasetStructure = json.loads(html.read())
 
