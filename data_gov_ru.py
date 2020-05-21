@@ -215,7 +215,7 @@ if __name__ == '__main__':
     console.setLevel(logging.INFO)
     console.setFormatter(formatConsole)
 	
-    filehandler = logging.FileHandler('Data.gov.ru-{}.log'.format(datetime.strptime(datetime.datetime.now(), "%d.%m.%y_%H:%M")))
+    filehandler = logging.FileHandler('Data.gov.ru-{}.log'.format(datetime.datetime.now().strftime("%Y.%m.%d_%H:%M")))
     filehandler.setLevel(logging.INFO)
     filehandler.setFormatter(formatLogger)
 	
@@ -239,5 +239,5 @@ if __name__ == '__main__':
         exit(1)
         
     stopTime = datetime.datetime.now()    
-    logger.info('Времы выполнения скрипта: ' + str(stopTime - startTime))
     logger.info('Окончание работы ------------------------------------- ' )
+    logger.info('Времы выполнения скрипта: ' + str(stopTime - startTime))
