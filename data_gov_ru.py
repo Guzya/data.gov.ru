@@ -24,15 +24,16 @@ def getDatasets(access_token, ctx):
 
     try:        
         html = urlopen('https://data.gov.ru/api/json/dataset/?access_token=' + access_token, context=ctx)
+        logger.info('Url Datasets: {}'.format(html.url))
         return json.loads(html.read(), strict=False)
-    logger.error HTTPError as e:
-        print(e)
+    except HTTPError as e:
+        logger.error(e)
         return None
-    logger.error URLError as e:
-        print(e)
+    except URLError as e:
+        logger.error(e)
         return None
-    logger.error JSONDecodeError as e:
-        print(e)
+    except JSONDecodeError as e:
+        logger.error(e)
         return None
 
 
@@ -40,7 +41,7 @@ def getDatasetVersion(dataset, access_token, ctx=None):
     """Достаем информацию по конкретному набору данных (НЕ сами данные)"""
 
     try:		
-        logger.info('https://data.gov.ru/api/json/dataset/' + dataset + '?access_token=' + access_token)
+        logger.info('https://data.gov.ru/api/json/dataset/{}?access_token={}'.format(dataset, access_token))
         html = urlopen('https://data.gov.ru/api/json/dataset/' + dataset + '?access_token=' + access_token, context=ctx)
         return json.loads(html.read(), strict=False)
     except HTTPError as e:
@@ -83,14 +84,14 @@ def getDatasetData(dataset, access_token, ctx=None):
         # Получаем временную отметку для следующего запроса
         html = urlopen('https://data.gov.ru/api/json/dataset/' + dataset[
             'identifier'] + '/version/' + '?access_token=' + access_token, context=ctx)
-        logger.info('Url Version: ' + html.url)
+        logger.info('Url Version: '.format(html.url))
         datasetCreated = json.loads(html.read())
 
         # Получаем ссылки на файлы с данными
         html = urlopen(
             'https://data.gov.ru/api/json/dataset/' + dataset['identifier'] + '/version/' + datasetCreated[0][
                 'created'] + '/?access_token=' + access_token, context=ctx)
-        logger.info('Url Sources: ' + html.url)
+        logger.info('Url Sources: {}'.format(html.url))
 
         datasetSource = json.loads(html.read())
 
@@ -110,8 +111,8 @@ def getDatasetData(dataset, access_token, ctx=None):
             dataFile = urlopen(
             'https://data.gov.ru/api/json/dataset/' + dataset['identifier'] + '/version/' + datasetCreated[0][
                 'created'] + '/content/?access_token=' + access_token, context=ctx)
-            logger.info('URL dataset file: ' + 'https://data.gov.ru/api/json/dataset/' + dataset['identifier'] + '/version/' + datasetCreated[0][
-                'created'] + '/content/?access_token=' + access_token)
+            logger.info('URL dataset file: https://data.gov.ru/api/json/dataset/{}/version/{}/content'
+                +'/?access_token={}'.format(dataset['identifier'], datasetCreated[0]['created'], access_token))
             
             with open(fileName, 'w') as f:
                 dataLines = json.loads(dataFile.read())
@@ -130,8 +131,8 @@ def getDatasetData(dataset, access_token, ctx=None):
             'https://data.gov.ru/api/json/dataset/' + dataset['identifier'] + '/version/' + datasetCreated[0][
                 'created'] + '/structure' + '/?access_token=' + access_token, context=ctx)
         
-        logger.info('URL structure file: ' + 'https://data.gov.ru/api/json/dataset/' + dataset['identifier'] + '/version/' + datasetCreated[0][
-                'created'] + '/structure' + '/?access_token=' + access_token)
+        logger.info('URL structure file: https://data.gov.ru/api/json/dataset/{}/version/{}/structure' 
+            + '/?access_token={}'.format(dataset['identifier'], datasetCreated[0]['created'], access_token))
         
         datasetStructure = json.loads(html.read())
 
@@ -150,7 +151,6 @@ def getDatasetData(dataset, access_token, ctx=None):
         logger.error(e)
         return None        
     except Exception as e:
-        logger.error('Ошибка -------:')
         logger.error(e)
         logger.error(dataset)
         return None
@@ -190,14 +190,14 @@ def main(access_token, search_string=None, ctx=None):
     i = 0
     for dataset in datasets_data:
         i = i + 1
-        logger.info('getDatasetVersion: ' + str(i))
+        logger.info('getDatasetVersion: {}'.format(i))
         time.sleep(random.randint(0, 6))
         datasets_version.append(getDatasetVersion(dataset['identifier'], access_token, ctx))
     
     i = 0
     for dataset in datasets_version:
         i = i + 1
-        logger.info('getDatasetData: ' + str(i))
+        logger.info('getDatasetData: {}'.format(i))
         time.sleep(random.randint(0, 6))
         getDatasetData(dataset, access_token, ctx)
 
@@ -208,14 +208,14 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 	
-    formatLogger = logging.Formatter('%(asctime)s: %(name)-12s: %(funcName)-12s: %(levelname)-8s: %(message)s')
+    formatLogger = logging.Formatter('%(asctime)s: %(name)-12s: %(funcName)-17s: %(levelname)-8s: %(message)s')
     formatConsole = logging.Formatter('%(asctime)s: %(levelname)-6s: %(message)s')
 	
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
     console.setFormatter(formatConsole)
 	
-    filehandler = logging.FileHandler('Data.gov.ru.log')
+    filehandler = logging.FileHandler('Data.gov.ru-{}.log'.format(datetime.strptime(datetime.datetime.now(), "%d.%m.%y_%H:%M")))
     filehandler.setLevel(logging.INFO)
     filehandler.setFormatter(formatLogger)
 	
