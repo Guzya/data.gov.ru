@@ -188,7 +188,7 @@ def getDatasetData(dataset, access_token, ctx=None):
             logger.info('URL dataset file: {}'.format(dataFile.url))
             
             with open(fileName, 'w') as f:
-                dataLines = json.loads(dataFile.read())
+                dataLines = json.loads(dataFile.read(), strict=False)
                 w = csv.DictWriter(f, dataLines[0].keys(),delimiter=';')
                 w.writeheader()
                 for line in dataLines:
@@ -293,7 +293,6 @@ def main(access_token, search_string=None, ctx=None):
     for dataset in datasets_organization:
         i = i + 1
         logger.info('getDatasetVersion: {}'.format(i))
-        logger.info('dataset: {}'.format(dataset))
         time.sleep(random.randint(0, 6))
         datasets_version.append(getOrganizationDatasetVersion(dataset['organization'], dataset['identifier'], access_token, ctx))
     
