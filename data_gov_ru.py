@@ -79,7 +79,7 @@ def getDatasetData(dataset, access_token, ctx=None):
         else:
             fileName = creatorDir + "/" + dataset['identifier'] + '.HZ'
             fileNameContent = creatorDir + "/" + dataset['identifier'] + "_structure.HZ"
-            logger.info('DataSet  {} : {}'.format(dataset['identifier'], dataset['format']))
+            logger.error('DataSet  {} : {}'.format(dataset['identifier'], dataset['format']))
 
         # Получаем временную отметку для следующего запроса
         html = urlopen('https://data.gov.ru/api/json/dataset/' + dataset[
