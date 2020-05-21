@@ -37,6 +37,78 @@ def getDatasets(access_token, ctx):
         return None
 
 
+def getOrganizations(access_token, ctx):
+    """Перечень организаций"""
+
+    try:        
+        html = urlopen('https://data.gov.ru/api/json/organization/?access_token=' + access_token, context=ctx)
+        logger.info('Url Organization: {}'.format(html.url))
+        return json.loads(html.read(), strict=False)
+    except HTTPError as e:
+        logger.error(e)
+        return None
+    except URLError as e:
+        logger.error(e)
+        return None
+    except JSONDecodeError as e:
+        logger.error(e)
+        return None
+
+
+
+def getOrganizationDatasets(idOrganization, access_token, ctx=None):
+    """Достаем перечень наборов данных по организации"""
+
+    try:		        
+        html = urlopen('https://data.gov.ru/api/json/organization/' + idOrganization + '/dataset/?access_token=' + access_token, context=ctx)
+        logger.info('Url Organization Datasets: {}'.format(html.url))
+        return json.loads(html.read(), strict=False)
+    except HTTPError as e:
+        logger.error(e)
+        return None
+    except URLError as e:
+        logger.error(e)
+        return None
+    except JSONDecodeError as e:
+        with open(os.path.dirname(sys.argv[0]) + '/err_json.txt','w') as f:
+            f.write(html.read())
+        logger.error(e)
+        return None
+    except Exception as e:
+        with open(os.path.dirname(sys.argv[0]) + '/err.txt','w') as f:
+            f.write(html.read())
+        logger.error(e)
+        logger.error(dataset)
+        return None
+
+
+
+def getOrganizationDatasetVersion(idOrganization, dataset, access_token, ctx=None):
+    """Достаем информацию по конкретному набору данных (НЕ сами данные)"""
+
+    try:		        
+        html = urlopen('https://data.gov.ru/api/json/organization/' + idOrganization + '/dataset/'  + dataset + '?access_token=' + access_token, context=ctx)
+        logger.info('Url Organization Dataset Version: {}'.format(html.url))
+        return json.loads(html.read(), strict=False)
+    except HTTPError as e:
+        logger.error(e)
+        return None
+    except URLError as e:
+        logger.error(e)
+        return None
+    except JSONDecodeError as e:
+        with open(os.path.dirname(sys.argv[0]) + '/err_json.txt','w') as f:
+            f.write(html.read())
+        logger.error(e)
+        return None
+    except Exception as e:
+        with open(os.path.dirname(sys.argv[0]) + '/err.txt','w') as f:
+            f.write(html.read())
+        logger.error(e)
+        logger.error(dataset)
+        return None
+
+
 def getDatasetVersion(dataset, access_token, ctx=None):
     """Достаем информацию по конкретному набору данных (НЕ сами данные)"""
 
@@ -84,7 +156,9 @@ def getDatasetData(dataset, access_token, ctx=None):
         # Получаем временную отметку для следующего запроса
         html = urlopen('https://data.gov.ru/api/json/dataset/' + dataset[
             'identifier'] + '/version/' + '?access_token=' + access_token, context=ctx)
-        logger.info('Url Version: '.format(html.url))
+        
+        logger.info('Url Version: {}'.format(html.url))
+        
         datasetCreated = json.loads(html.read())
 
         # Получаем ссылки на файлы с данными
@@ -167,10 +241,22 @@ def getDataSetsFiltered(datasets, filterString):
     return datasetsFiltered
 
 
+def getOrganizationsFiltered(datasets, filterString):
+    """Фильтруем список организаций"""
+
+    datasetsFiltered = []
+    for line in datasets:
+        if (line['title'] is None)or(filterString not in line['title'].lower()):
+            continue
+        datasetsFiltered.append(line)
+    return datasetsFiltered
+
+
 def main(access_token, search_string=None, ctx=None):
     """Основная функция"""
 
-    datasets = getDatasets(access_token, ctx)
+    #datasets = getDatasets(access_token, ctx)
+    datasets = getOrganizations(access_token, ctx)
     if datasets is None:
         logger.error('Не смогли получить перечень наборов данных')
         exit(1)
@@ -182,16 +268,36 @@ def main(access_token, search_string=None, ctx=None):
     if len(sys.argv) == 1:
         exit(0)
 		
-    datasets_data = getDataSetsFiltered(datasets, search_string.lower())        # Отбираем данные по Строке поиска
+    #datasets_data = getDataSetsFiltered(datasets, search_string.lower())        # Отбираем данные по Строке поиска
+    datasets_data = getOrganizationsFiltered(datasets, search_string.lower())        # Отбираем данные по Строке поиска
     logger.info('По критерию поиска подходит наборов: {}'.format(len(datasets_data)))
     
-    datasets_version = []
+    datasets_organization = []
     i = 0
     for dataset in datasets_data:
         i = i + 1
-        logger.info('getDatasetVersion: {}'.format(i))
+        logger.info('getOrganizationDatasets: {}'.format(i))
         time.sleep(random.randint(0, 6))
-        datasets_version.append(getDatasetVersion(dataset['identifier'], access_token, ctx))
+        dat_buf = getOrganizationDatasets(dataset['id'], access_token, ctx)
+        for buf in dat_buf:
+            datasets_organization.append(buf)
+    
+    logger.info('Найдено наборов: {}'.format(len(datasets_organization)))
+    datasets_version = []
+    i = 0
+    #for dataset in datasets_data:
+        #i = i + 1
+        #logger.info('getDatasetVersion: {}'.format(i))
+        #time.sleep(random.randint(0, 6))
+        #datasets_version.append(getDatasetVersion(dataset['identifier'], access_token, ctx))
+    for dataset in datasets_organization:
+        i = i + 1
+        logger.info('getDatasetVersion: {}'.format(i))
+        logger.info('dataset: {}'.format(dataset))
+        time.sleep(random.randint(0, 6))
+        datasets_version.append(getOrganizationDatasetVersion(dataset['organization'], dataset['identifier'], access_token, ctx))
+    
+    
     
     i = 0
     for dataset in datasets_version:
