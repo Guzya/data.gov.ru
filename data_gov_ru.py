@@ -126,18 +126,19 @@ def getDatasetData(dataset, access_token, ctx=None):
             with open(fileName, 'bw') as f:
                 f.write(dataFile.read())
 
-        html = urlopen(
-            'https://data.gov.ru/api/json/dataset/' + dataset['identifier'] + '/version/' + datasetCreated[0][
-                'created'] + '/structure' + '/?access_token=' + access_token, context=ctx)
+       # Качаем файл со структурой данных 
+        #html = urlopen(
+            #'https://data.gov.ru/api/json/dataset/' + dataset['identifier'] + '/version/' + datasetCreated[0][
+                #'created'] + '/structure' + '/?access_token=' + access_token, context=ctx)
         
-        logger.info('URL structure file: {}'.format(html.url))
+        #logger.info('URL structure file: {}'.format(html.url))
         
-        datasetStructure = json.loads(html.read())
+        #datasetStructure = json.loads(html.read())
 
-        dataFileStructure = urlopen(datasetStructure['source'], context=ctx)
+        #dataFileStructure = urlopen(datasetStructure['source'], context=ctx)
 
-        with open(fileNameContent, 'bw') as f:
-            f.write(dataFileStructure.read())
+        #with open(fileNameContent, 'bw') as f:
+            #f.write(dataFileStructure.read())
 
     except HTTPError as e:
         logger.error(e)
