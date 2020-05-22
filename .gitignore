@@ -1,4 +1,4 @@
-datasets*
+*.json
 *.txt
 *.log
 */*

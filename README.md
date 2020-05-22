@@ -11,10 +11,26 @@
 
 Строка посика передается в качестве аргумента при вызове скрипта.<br/><br/>
 
-python3 data_gov_ru.py 'Москв'    # Отбираем данные по Москве<br/>
-python3 data_gov_ru.py            # сформирует файл datasets.json<br/>
+python3 data_gov_ru.py --s 'Москв'    # Отбираем данные по Москве<br/>
+python3 data_gov_ru.py                # сформирует файл organization.json<br/>
+python3 data_gov_ru.py --t data       # сформирует файл datasets.json<br/>
+
+
+
+Справка по использованию скрипта
+
+usage: data_gov_ru.py [-h] [--s S] [--t {data,org}] [--console {yes,no}]
+
+Справка по аргументам!
+
+optional arguments:
+  -h, --help          show this help message and exit
+  --s S               Строка поиска
+  --t {data,org}      Алгоритм поиска, по наборам данных "data", по
+                      организациям "org". По умолчанию "org"
+  --console {yes,no}  Вывод лога в консоль, по умолчанию "yes"
 
 
 Результатом работы скрипта являются:
- - файл datasets.json (содержит список наборов данных)
+ - файл organizations.json (содержит список организаций) или файл datasets.json (содержит список наборов данных)
  - папки с наборами данных, названия папок соответствуют названиям организаций

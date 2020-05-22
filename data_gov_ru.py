@@ -15,9 +15,9 @@ import datetime
 import time
 import random
 import os
-import sys
 import csv
 import logging
+import argparse
 
 def getDatasets(access_token, ctx):
     """Перечень наборов данных"""
@@ -252,58 +252,101 @@ def getOrganizationsFiltered(datasets, filterString):
     return datasetsFiltered
 
 
-def main(access_token, search_string=None, ctx=None):
+def main(access_token, search_string=None, ctx=None, alg_type=None):
     """Основная функция"""
 
-    #datasets = getDatasets(access_token, ctx)
-    datasets = getOrganizations(access_token, ctx)
-    if datasets is None:
-        logger.error('Не смогли получить перечень наборов данных')
-        exit(1)
-    logger.info('Всего наборов данных: {}'.format(len(datasets)))
     
-    with open('datasets.json','w', encoding='utf-8') as f:
-        json.dump(datasets, f, indent=4)
+    if alg_type == 'org':
+        """Ведем поиск по организациям"""
+        datasets = getOrganizations(access_token, ctx)
+    
+        if datasets is None:
+            logger.error('Не смогли получить список организаций')
+            exit(1)
+        logger.info('Всего организаций: {}'.format(len(datasets)))
+    
+        with open('organizations.json','w', encoding='utf-8') as f:
+            json.dump(datasets, f, indent=4)
 		
-    if len(sys.argv) == 1:
-        exit(0)
+        if search_string is None:
+            exit(0)
 		
-    #datasets_data = getDataSetsFiltered(datasets, search_string.lower())        # Отбираем данные по Строке поиска
-    datasets_data = getOrganizationsFiltered(datasets, search_string.lower())        # Отбираем данные по Строке поиска
-    logger.info('По критерию поиска подходит наборов: {}'.format(len(datasets_data)))
+        datasets_data = getOrganizationsFiltered(datasets, search_string.lower())        # Отбираем данные по Строке поиска
+        logger.info('По критерию поиска подходит организаций: {}'.format(len(datasets_data)))
     
-    datasets_organization = []
-    i = 0
-    for dataset in datasets_data:
-        i = i + 1
-        logger.info('getOrganizationDatasets: {}'.format(i))
-        time.sleep(random.randint(0, 6))
-        dat_buf = getOrganizationDatasets(dataset['id'], access_token, ctx)
-        for buf in dat_buf:
-            datasets_organization.append(buf)
+        datasets_organization = []
+        i = 0
+        for dataset in datasets_data:
+            i = i + 1
+            logger.info('getOrganizationDatasets: {}'.format(i))
+            time.sleep(random.randint(0, 6))
+            dat_buf = getOrganizationDatasets(dataset['id'], access_token, ctx)
+            for buf in dat_buf:
+                datasets_organization.append(buf)
     
-    logger.info('Найдено наборов: {}'.format(len(datasets_organization)))
-    datasets_version = []
-    i = 0
-    #for dataset in datasets_data:
-        #i = i + 1
-        #logger.info('getDatasetVersion: {}'.format(i))
-        #time.sleep(random.randint(0, 6))
-        #datasets_version.append(getDatasetVersion(dataset['identifier'], access_token, ctx))
-    for dataset in datasets_organization:
-        i = i + 1
-        logger.info('getDatasetVersion: {}'.format(i))
-        time.sleep(random.randint(0, 6))
-        datasets_version.append(getOrganizationDatasetVersion(dataset['organization'], dataset['identifier'], access_token, ctx))
+        logger.info('Найдено наборов: {}'.format(len(datasets_organization)))
+        datasets_version = []
+        i = 0
+        
+        for dataset in datasets_organization:
+            i = i + 1
+            logger.info('getDatasetVersion: {}'.format(i))
+            time.sleep(random.randint(0, 6))
+            datasets_version.append(getOrganizationDatasetVersion(dataset['organization'], dataset['identifier'], access_token, ctx))
+            
+        i = 0
+        for dataset in datasets_version:
+            i = i + 1
+            logger.info('getDatasetData: {}'.format(i))
+            time.sleep(random.randint(0, 6))
+            getDatasetData(dataset, access_token, ctx)
     
     
+    elif alg_type == 'data':
+        """Ведем поиск по перечню наборов данных"""
+        
+        datasets = getDatasets(access_token, ctx)   
     
-    i = 0
-    for dataset in datasets_version:
-        i = i + 1
-        logger.info('getDatasetData: {}'.format(i))
-        time.sleep(random.randint(0, 6))
-        getDatasetData(dataset, access_token, ctx)
+        if datasets is None:
+            logger.error('Не смогли получить перечень наборов данных')
+            exit(1)
+        logger.info('Всего наборов данных: {}'.format(len(datasets)))
+    
+        with open('datasets.json','w', encoding='utf-8') as f:
+            json.dump(datasets, f, indent=4)
+		
+        if search_string is None:
+            exit(0)
+		
+        datasets_data = getDataSetsFiltered(datasets, search_string.lower())        # Отбираем данные по Строке поиска
+    
+        logger.info('По критерию поиска подходит наборов: {}'.format(len(datasets_data)))
+    
+        datasets_organization = []
+        i = 0
+        for dataset in datasets_data:
+            i = i + 1
+            logger.info('getOrganizationDatasets: {}'.format(i))
+            time.sleep(random.randint(0, 6))
+            dat_buf = getOrganizationDatasets(dataset['id'], access_token, ctx)
+            for buf in dat_buf:
+                datasets_organization.append(buf)
+    
+        logger.info('Найдено наборов: {}'.format(len(datasets_organization)))
+        datasets_version = []
+        i = 0
+        for dataset in datasets_data:
+            i = i + 1
+            logger.info('getDatasetVersion: {}'.format(i))
+            time.sleep(random.randint(0, 6))
+            datasets_version.append(getDatasetVersion(dataset['identifier'], access_token, ctx))
+          
+        i = 0
+        for dataset in datasets_version:
+            i = i + 1
+            logger.info('getDatasetData: {}'.format(i))
+            time.sleep(random.randint(0, 6))
+            getDatasetData(dataset, access_token, ctx)
 
 
 if __name__ == '__main__':
@@ -313,18 +356,30 @@ if __name__ == '__main__':
     logger.setLevel(logging.INFO)
 	
     formatLogger = logging.Formatter('%(asctime)s: %(name)-12s: %(funcName)-17s: %(levelname)-8s: %(message)s')
-    formatConsole = logging.Formatter('%(asctime)s: %(levelname)-6s: %(message)s')
-	
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    console.setFormatter(formatConsole)
-	
+    	
     filehandler = logging.FileHandler('Data.gov.ru-{}.log'.format(datetime.datetime.now().strftime("%Y.%m.%d_%H:%M")))
     filehandler.setLevel(logging.INFO)
     filehandler.setFormatter(formatLogger)
 	
-    logger.addHandler(console)
     logger.addHandler(filehandler)
+    
+    # Парсер аргументов коммандной строки
+    parser = argparse.ArgumentParser(description='Справка по аргументам!')
+    parser.add_argument("--s", type=str, help="Строка поиска")
+    parser.add_argument("--t", choices=["data", "org"],
+        default="org", type=str, help="Алгоритм поиска, по наборам данных \"data\", по организациям \"org\". По умолчанию \"org\"")
+    parser.add_argument("--console", choices=["yes", "no"],
+        default="yes", type=str, help="Вывод лога в консоль, по умолчанию \"yes\"")
+    
+    args = parser.parse_args()
+    
+    if args.console == 'yes':
+        formatConsole = logging.Formatter('%(asctime)s: %(levelname)-6s: %(message)s')	
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        console.setFormatter(formatConsole)
+        logger.addHandler(console)
+    
 	
     logger.info('Начало работы ------------------------------------- ')	
     startTime = datetime.datetime.now()
@@ -332,15 +387,9 @@ if __name__ == '__main__':
     ctx = ssl.create_default_context(capath='/etc/ssl/certs')
     
     access_token = os.environ['data_gov_access_token']  # Выдается при регистрации на data.gov.ru   
-    if len(sys.argv) == 1:
-        main(access_token, ctx=ctx)
-    elif len(sys.argv) == 2:
-        logger.info('Строка поиска: \'{}\''.format(sys.argv[1]))
-        main(access_token, search_string=sys.argv[1], ctx=ctx)
-    else:
-        logger.error('Аргументов должно быть не больше одного.')
-        logger.error('Пример: python3 data_gov_ru.py \'Москв\'')
-        exit(1)
+    logger.info('Строка поиска: \'{}\''.format(args.s))
+    
+    main(access_token, search_string=args.s, ctx=ctx, alg_type=args.t)
         
     stopTime = datetime.datetime.now()    
     logger.info('Окончание работы ------------------------------------- ' )
