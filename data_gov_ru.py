@@ -321,18 +321,7 @@ def main(access_token, search_string=None, ctx=None, alg_type=None):
         datasets_data = getDataSetsFiltered(datasets, search_string.lower())        # Отбираем данные по Строке поиска
     
         logger.info('По критерию поиска подходит наборов: {}'.format(len(datasets_data)))
-    
-        datasets_organization = []
-        i = 0
-        for dataset in datasets_data:
-            i = i + 1
-            logger.info('getOrganizationDatasets: {}'.format(i))
-            time.sleep(random.randint(0, 6))
-            dat_buf = getOrganizationDatasets(dataset['id'], access_token, ctx)
-            for buf in dat_buf:
-                datasets_organization.append(buf)
-    
-        logger.info('Найдено наборов: {}'.format(len(datasets_organization)))
+               
         datasets_version = []
         i = 0
         for dataset in datasets_data:
