@@ -23,12 +23,12 @@ usage: data_gov_ru.py [-h] [--s S] [--t {data,org}] [--console {yes,no}]
 
 Справка по аргументам!
 
-optional arguments:
-  -h, --help          show this help message and exit
-  --s S               Строка поиска
-  --t {data,org}      Алгоритм поиска, по наборам данных "data", по
-                      организациям "org". По умолчанию "org"
-  --console {yes,no}  Вывод лога в консоль, по умолчанию "yes"
+optional arguments:<br/>
+  -h, --help          show this help message and exit<br/>
+  --s S               Строка поиска<br/>
+  --t {data,org}      Алгоритм поиска, по наборам данных "data", по <br/>
+                      организациям "org". По умолчанию "org" <br/>
+  --console {yes,no}  Вывод лога в консоль, по умолчанию "yes" <br/>
 
 
 Результатом работы скрипта являются:
